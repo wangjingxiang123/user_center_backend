@@ -1,5 +1,4 @@
 package com.wjx.user_center_backend.service.impl;
-import java.util.Date;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -13,6 +12,8 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+
+import static com.wjx.user_center_backend.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
  * @author wjx
@@ -28,7 +29,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     //盐值
     private static final String SALT = "wjx";
 
-    private static final String USER_LOGIN_STATE = "userLoginState" ;
 
     @Override
     public long userRegister(String userAccount, String userPassword, String checkPassword) {
@@ -77,7 +77,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public User doLogin(String userAccount, String userPassword, HttpServletRequest request ) {
+    public User userLogin(String userAccount, String userPassword, HttpServletRequest request ) {
 
         // 1. 校验
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
@@ -108,21 +108,34 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
 
         // 3. 用户脱敏
-        User safetyUser = new User();
-        safetyUser.setId(user.getId());
-        safetyUser.setUsername(user.getUsername());
-        safetyUser.setUserAccount(userAccount);
-        safetyUser.setAvatarUrl(user.getAvatarUrl());
-        safetyUser.setGender(user.getGender());
-        safetyUser.setPhone(user.getPhone());
-        safetyUser.setEmail(user.getEmail());
-        safetyUser.setUserStatus(user.getUserStatus());
-        safetyUser.setCreateTime(user.getCreateTime());
+        User safetyUser = getSafetyUser(user);
 
         // 4. 记录用户的登录态
         request.getSession().setAttribute(USER_LOGIN_STATE, safetyUser);
         return safetyUser;
     }
+
+    /**
+     * 用户脱敏
+     * @param originalUser
+     * @return
+     */
+    @Override
+    public User getSafetyUser(User originalUser) {
+        User safetyUser = new User();
+        safetyUser.setId(originalUser.getId());
+        safetyUser.setUsername(originalUser.getUsername());
+        safetyUser.setUserAccount(originalUser.getUserAccount());
+        safetyUser.setAvatarUrl(originalUser.getAvatarUrl());
+        safetyUser.setGender(originalUser.getGender());
+        safetyUser.setPhone(originalUser.getPhone());
+        safetyUser.setEmail(originalUser.getEmail());
+        safetyUser.setUserStatus(originalUser.getUserStatus());
+        safetyUser.setCreateTime(originalUser.getCreateTime());
+        safetyUser.setUserRole(originalUser.getUserRole());
+        return safetyUser;
+    }
+
 }
 
 

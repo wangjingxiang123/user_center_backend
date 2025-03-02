@@ -27,6 +27,9 @@ spring:
       connection-timeout: 30000
       # 空闲连接超时时间，默认 10 分钟
       idle-timeout: 600000
+  #session失效时间
+  session:
+    timeout: 86400
 
 mybatis-plus:
   configuration:
