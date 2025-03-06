@@ -2,9 +2,11 @@ package com.wjx.user_center_backend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.wjx.user_center_backend.common.ErrorCode;
+import com.wjx.user_center_backend.exception.BusinessException;
+import com.wjx.user_center_backend.mapper.UserMapper;
 import com.wjx.user_center_backend.model.domain.User;
 import com.wjx.user_center_backend.service.UserService;
-import com.wjx.user_center_backend.mapper.UserMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -31,17 +33,20 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
 
     @Override
-    public long userRegister(String userAccount, String userPassword, String checkPassword) {
+    public long userRegister(String userAccount, String userPassword, String checkPassword, String planetCode) {
 
         // 1. 校验
-        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword)) {
-            return -1;
+        if (StringUtils.isAnyBlank(userAccount, userPassword, checkPassword, planetCode)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数为空");
+        }
+        if (planetCode.length() > 5) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "编号过长");
         }
         if (userAccount.length() < 4) {
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账户过短");
         }
         if (userPassword.length() < 8 || checkPassword.length() < 8) {
-            return -1;
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "密码过短");
         }
         // 账户不能包含特殊字符
         String specialCharPattern = "[^a-zA-Z0-9_]";
@@ -57,6 +62,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         queryWrapper.eq("userAccount", userAccount);
         long count = userMapper.selectCount(queryWrapper);
         if (count > 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "账号重复");
+        }
+
+        // 编号不能重复
+        queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("planetCode", planetCode);
+        count = userMapper.selectCount(queryWrapper);
+        if (count > 0) {
             return -1;
         }
 
@@ -68,6 +81,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         User user = new User();
         user.setUserAccount(userAccount);
         user.setUserPassword(encryptPassword);
+        user.setPlanetCode(planetCode);
         boolean saveResult = this.save(user);
         if (!saveResult) {
             return -1;
@@ -77,7 +91,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public User userLogin(String userAccount, String userPassword, HttpServletRequest request ) {
+    public User userLogin(String userAccount, String userPassword, HttpServletRequest request) {
 
         // 1. 校验
         if (StringUtils.isAnyBlank(userAccount, userPassword)) {
@@ -117,11 +131,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     /**
      * 用户脱敏
+     *
      * @param originalUser
      * @return
      */
     @Override
     public User getSafetyUser(User originalUser) {
+        if (originalUser == null) {
+            return null;
+        }
         User safetyUser = new User();
         safetyUser.setId(originalUser.getId());
         safetyUser.setUsername(originalUser.getUsername());
@@ -130,10 +148,23 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setGender(originalUser.getGender());
         safetyUser.setPhone(originalUser.getPhone());
         safetyUser.setEmail(originalUser.getEmail());
+        safetyUser.setPlanetCode(originalUser.getPlanetCode());
         safetyUser.setUserStatus(originalUser.getUserStatus());
         safetyUser.setCreateTime(originalUser.getCreateTime());
         safetyUser.setUserRole(originalUser.getUserRole());
         return safetyUser;
+    }
+
+    /**
+     * 用户注销
+     *
+     * @param request
+     * @return
+     */
+    @Override
+    public int userLogout(HttpServletRequest request) {
+        request.getSession().removeAttribute(USER_LOGIN_STATE);
+        return 1;
     }
 
 }

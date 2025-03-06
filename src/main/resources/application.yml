@@ -1,6 +1,8 @@
 # 应用服务 WEB 访问端口
 server:
   port: 8080
+  servlet:
+    context-path: /api
 
 # 下面这些内容是为了让 MyBatis 映射
 # 指定 Mybatis 的 Mapper 文件

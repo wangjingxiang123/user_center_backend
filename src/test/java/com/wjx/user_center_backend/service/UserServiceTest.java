@@ -46,44 +46,45 @@ class UserServiceTest {
         String userAccount = "";
         String userPassword = "12345678";
         String checkPassword = "12345678";
-        long result = userService.userRegister(userAccount, userPassword, checkPassword);
+        String planetCode = "1";
+        long result = userService.userRegister(userAccount, userPassword, checkPassword,planetCode);
         assertEquals(-1, result);
 
         // 测试账户长度过短的情况
         userAccount = "abc";
-        result = userService.userRegister(userAccount, userPassword, checkPassword);
+        result = userService.userRegister(userAccount, userPassword, checkPassword,planetCode);
         assertEquals(-1, result);
 
         // 测试密码长度过短的情况
         userAccount = "abcdef";
         userPassword = "1234";
         checkPassword = "1234";
-        result = userService.userRegister(userAccount, userPassword, checkPassword);
+        result = userService.userRegister(userAccount, userPassword, checkPassword,planetCode);
         assertEquals(-1, result);
 
         // 测试账户包含特殊字符的情况
         userAccount = "abc@";
         userPassword = "12345678";
         checkPassword = "12345678";
-        result = userService.userRegister(userAccount, userPassword, checkPassword);
+        result = userService.userRegister(userAccount, userPassword, checkPassword,planetCode);
         assertEquals(-1, result);
 
         // 测试密码和校验密码不匹配的情况
         userAccount = "abcdef";
         userPassword = "12345678";
         checkPassword = "87654321";
-        result = userService.userRegister(userAccount, userPassword, checkPassword);
+        result = userService.userRegister(userAccount, userPassword, checkPassword,planetCode);
         assertEquals(-1, result);
 
         // 测试正常注册情况
-        userAccount = "wjx123";
+        userAccount = "wjx1234";
         userPassword = "12345678";
         checkPassword = "12345678";
-        result = userService.userRegister(userAccount, userPassword, checkPassword);
+        result = userService.userRegister(userAccount, userPassword, checkPassword,planetCode);
         assertEquals(1L, result);
 
         // 测试账户重复的情况
-        result = userService.userRegister(userAccount, userPassword, checkPassword);
+        result = userService.userRegister(userAccount, userPassword, checkPassword,planetCode);
         assertEquals(-1, result);
     }
 
