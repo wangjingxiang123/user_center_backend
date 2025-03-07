@@ -18,6 +18,7 @@ spring:
     username: root
     password: wjxwjx123*
     driver-class-name: com.mysql.cj.jdbc.Driver
+    schema: classpath:schema.sql
     hikari:
       # 连接池最大连接数，默认是 10
       maximum-pool-size: 20
