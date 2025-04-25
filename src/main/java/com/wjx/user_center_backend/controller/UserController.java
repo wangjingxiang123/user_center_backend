@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -114,8 +113,32 @@ public class UserController {
 
     }
 
-    @PostMapping("/delete")
-    public BaseResponse<Boolean> deleteUser(@RequestBody long id, HttpServletRequest request) {
+    @PostMapping("/selectSearch")
+    public BaseResponse<List<User>> selectSearch(@RequestBody User user, HttpServletRequest request) {
+        // 仅管理员可查询
+        if (!isAdmin(request)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        List<User> list = userService.selectSearch(user);
+        return ResultUtils.success(list);
+
+    }
+
+    /**
+     * 更新用户信息
+     * @param user 用户实体
+     * @return 是否更新成功
+     */
+    @PutMapping("/update")
+    public BaseResponse<Boolean> updateUser(@RequestBody User user, HttpServletRequest request) {
+        if (!isAdmin(request)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        return ResultUtils.success(userService.updateUser(user));
+    }
+
+    @GetMapping("/delete")
+    public BaseResponse<Boolean> deleteUser(@RequestParam long id, HttpServletRequest request) {
         // 仅管理员可查询
         if (!isAdmin(request)) {
             throw new BusinessException(ErrorCode.NO_AUTH, "缺少管理员权限");

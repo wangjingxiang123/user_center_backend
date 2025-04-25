@@ -14,7 +14,7 @@ mybatis:
 # 数据源配置
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/user_center?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    url: jdbc:mysql://localhost:3306/partner_matching?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
     username: root
     password: wjxwjx123*
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -37,6 +37,7 @@ spring:
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
       logic-delete-field: isDelete # 全局逻辑删除字段名

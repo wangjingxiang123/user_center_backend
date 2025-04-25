@@ -1,10 +1,10 @@
 package com.wjx.user_center_backend.service;
 
-import com.wjx.user_center_backend.model.domain.User;
 import com.baomidou.mybatisplus.extension.service.IService;
-import org.springframework.stereotype.Service;
+import com.wjx.user_center_backend.model.domain.User;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author 14996
@@ -40,4 +40,18 @@ public interface UserService extends IService<User> {
      * 用户注销
      */
     int userLogout(HttpServletRequest request);
+
+    /**
+     * 更新用户
+     * @param user
+     * @return
+     */
+    boolean updateUser(User user);
+
+
+    /**
+     * 根据条件查询用户
+     * @param user
+     */
+    List<User> selectSearch(User user);
 }

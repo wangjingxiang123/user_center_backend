@@ -2,6 +2,8 @@ package com.wjx.user_center_backend.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.wjx.user_center_backend.common.ErrorCode;
 import com.wjx.user_center_backend.exception.BusinessException;
 import com.wjx.user_center_backend.mapper.UserMapper;
@@ -15,6 +17,9 @@ import org.springframework.util.DigestUtils;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import java.util.Collections;
+import java.util.List;
+
 import static com.wjx.user_center_backend.constant.UserConstant.USER_LOGIN_STATE;
 
 /**
@@ -27,6 +32,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Resource
     private UserMapper userMapper;
+
+    private final Gson gson = new Gson();
 
     //盐值
     private static final String SALT = "wjx";
@@ -152,6 +159,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         safetyUser.setUserStatus(originalUser.getUserStatus());
         safetyUser.setCreateTime(originalUser.getCreateTime());
         safetyUser.setUserRole(originalUser.getUserRole());
+        safetyUser.setTags(originalUser.getTags());
         return safetyUser;
     }
 
@@ -165,6 +173,61 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     public int userLogout(HttpServletRequest request) {
         request.getSession().removeAttribute(USER_LOGIN_STATE);
         return 1;
+    }
+
+    /**
+     * 更新用户
+     * @param user
+     * @return
+     */
+    @Override
+    public boolean updateUser(User user) {
+        return this.updateById(user);
+    }
+
+    @Override
+    public List<User> selectSearch(User user) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        // 用户名：模糊查询
+        if (user.getUsername() != null) {
+            queryWrapper.like("username", user.getUsername());
+        }
+        // 用户账户：模糊查询
+        if (user.getUserAccount() != null) {
+            queryWrapper.like("userAccount", user.getUserAccount());
+        }
+        // 性别：精确查询
+        if (user.getGender() != null) {
+            queryWrapper.eq("gender", user.getGender());
+        }
+        // 电话：模糊查询
+        if (user.getPhone() != null) {
+            queryWrapper.like("phone", user.getPhone());
+        }
+        // 邮箱：模糊查询
+        if (user.getEmail() != null) {
+            queryWrapper.like("email", user.getEmail());
+        }
+        // 状态：精确查询
+        if (user.getUserStatus() != null) {
+            queryWrapper.eq("userStatus", user.getUserStatus());
+        }
+        // 星球编号：精确查询
+        if (user.getPlanetCode() != null ) {
+            queryWrapper.eq("planetCode", user.getPlanetCode());
+        }
+        // 角色：精确查询
+        if (user.getUserRole() != null) {
+            queryWrapper.eq("userRole", user.getUserRole());
+        }
+        // 标签：模糊查询
+        if (user.getTags() != null &&!user.getTags().isEmpty()) {
+            List<String> tagList = gson.fromJson(user.getTags(), new TypeToken<List<String>>() {}.getType());
+            queryWrapper.in("tags", tagList);
+        }
+
+        return userMapper.selectList(queryWrapper);
+
     }
 
 }
