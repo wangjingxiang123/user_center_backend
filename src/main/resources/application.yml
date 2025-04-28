@@ -33,7 +33,10 @@ spring:
   #session失效时间
   session:
     timeout: 86400
-
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
